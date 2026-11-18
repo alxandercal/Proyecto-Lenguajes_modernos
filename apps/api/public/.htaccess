@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Apache a veces quita el encabezado Authorization; lo pasamos a PHP.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Todo lo que no sea un archivo real lo atiende index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
