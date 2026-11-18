@@ -1,0 +1,24 @@
+{
+  "name": "refood-connect",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "check:php": "php apps/api/tests/requirements.php",
+    "dev:api": "php -S 127.0.0.1:8000 -t apps/api/public apps/api/router.php",
+    "dev:web": "npm run dev -w @refood/web",
+    "build:web": "npm run generate -w @refood/web",
+    "typecheck": "npm run typecheck -w @refood/web",
+    "test:api": "php apps/api/tests/run.php",
+    "test:e2e": "php apps/api/tests/e2e/run.php",
+    "test": "npm run test:api && npm run test:e2e",
+    "fake:firebase": "php -S 127.0.0.1:9199 apps/api/tests/e2e/fake-firebase.php",
+    "seed": "php apps/api/scripts/seed.php"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+.nuxt/
+.output/
+.data/
+dist
+apps/web/.env
+apps/api/config/local.php
+apps/api/tests/e2e/.fake-db.json
+.DS_Store
+Thumbs.db
+*.log
+*.zip
