@@ -1,0 +1,15 @@
+<?php
+declare(strict_types=1);
+
+// Copia este archivo como local.php y llena tus datos. local.php NO se sube a GitHub.
+// En el hosting se usan variables de entorno con el mismo nombre en mayúsculas
+// (FIREBASE_PROJECT_ID, FIREBASE_API_KEY, ALLOWED_ORIGINS).
+return [
+    'firebase_project_id' => 'REEMPLAZAR-project-id',
+    'firebase_api_key' => 'REEMPLAZAR-api-key',
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        // 'https://tu-sitio.netlify.app',
+    ],
+];
