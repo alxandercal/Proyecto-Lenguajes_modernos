@@ -28,8 +28,6 @@ final class Remote
             CURLOPT_TIMEOUT => 15,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_SSL_VERIFYPEER => true,
-            // linea pq windows verdad
-            CURLOPT_CAINFO => __DIR__ . '/../certs/cacert.pem',
         ]);
         if ($body !== null) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($body, JSON_THROW_ON_ERROR));
