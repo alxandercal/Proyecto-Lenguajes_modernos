@@ -136,4 +136,3 @@ onMounted(async () => {
   await load()
 })
 </script>
-```[cite: 118, 119, 120]

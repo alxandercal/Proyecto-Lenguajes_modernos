@@ -2,6 +2,12 @@
 
 Plataforma web para que la comida que restaurantes, cafeterías y comercios no vendieron llegue a bancos de alimentos, comedores y albergues. Proyecto 01 de Lenguajes Modernos de Programación, Universidad de Guanajuato.
 
+|                    |                                                            |
+| ------------------ | ---------------------------------------------------------- |
+| Frontend publicado | https://PENDIENTE.netlify.app                              |
+| API publicada      | https://PENDIENTE.onrender.com/api/v1/health               |
+| Repositorio        | https://github.com/alxandercal/Proyecto-Lenguajes_modernos |
+
 ## Problema
 
 Muchos negocios tiran comida en buen estado porque no tienen una forma rápida de avisar a quien la necesita. Las organizaciones se enteran tarde o llegan dos por la misma comida. Nadie lleva la cuenta de cuánto alimento se salvó.

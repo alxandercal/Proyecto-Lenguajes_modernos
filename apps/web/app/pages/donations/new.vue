@@ -173,4 +173,3 @@ async function save() {
   }
 }
 </script>
-```[cite: 116, 117, 118]

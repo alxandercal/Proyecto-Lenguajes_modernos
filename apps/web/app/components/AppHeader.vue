@@ -39,4 +39,3 @@ import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
 </script>
-```[cite: 120]
