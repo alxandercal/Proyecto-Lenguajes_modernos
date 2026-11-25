@@ -8,7 +8,7 @@
     />
 
     <form v-else class="panel space-y-4" @submit.prevent="save">
-      <h1 class="page-title">Publicar donación</h1>
+      <h1 class="page-title">{{ editId ? 'Editar donación' : 'Publicar donación' }}</h1>
 
       <label class="block">
         <span class="text-sm font-medium">¿Qué donas?</span>
@@ -94,7 +94,7 @@
       <div v-if="error" role="alert" class="alert alert-error text-sm">{{ error }}</div>
 
       <button class="btn btn-primary w-full" :disabled="sending">
-        {{ sending ? 'Publicando...' : 'Publicar donación' }}
+        {{ sending ? 'Guardando...' : editId ? 'Guardar cambios' : 'Publicar donación' }}
       </button>
     </form>
   </div>
@@ -104,10 +104,13 @@
 import type { Donation, DonationInput } from '~/types'
 import { useAuthStore } from '~/stores/auth'
 
-// Publicar una donación. En la R2 el mismo formulario sirve para editar.
+// Publicar una donación. Con ?edit=ID el mismo formulario sirve para editar.
 const auth = useAuthStore()
+const route = useRoute()
 const { request } = useApi()
 const { catalog, load } = useCatalog()
+
+const editId = typeof route.query.edit === 'string' ? route.query.edit : ''
 
 const form = reactive<DonationInput>({
   title: '',
@@ -134,6 +137,24 @@ onMounted(async () => {
   await auth.whenReady()
   await load().catch((e: Error) => { error.value = e.message })
   form.zone = auth.profile?.zone ?? ''
+
+  if (editId) {
+    try {
+      const current = await request<Donation>(`/donations/${editId}`)
+      Object.assign(form, {
+        title: current.title,
+        category: current.category,
+        quantity: current.quantity,
+        unit: current.unit,
+        pickupAddress: current.pickupAddress,
+        zone: current.zone,
+        notes: current.notes
+      })
+      expiresLocal.value = toLocalInput(current.expiresAt)
+    } catch (e) {
+      error.value = (e as Error).message
+    }
+  }
 })
 
 async function save() {
@@ -141,7 +162,9 @@ async function save() {
   error.value = ''
   try {
     form.expiresAt = new Date(expiresLocal.value).toISOString()
-    const saved = await request<Donation>('/donations', { method: 'POST', body: form })
+    const saved = editId
+      ? await request<Donation>(`/donations/${editId}`, { method: 'PATCH', body: form })
+      : await request<Donation>('/donations', { method: 'POST', body: form })
     await navigateTo(`/donations/${saved.id}`)
   } catch (e) {
     error.value = (e as Error).message
@@ -150,3 +173,4 @@ async function save() {
   }
 }
 </script>
+```[cite: 116, 117, 118]

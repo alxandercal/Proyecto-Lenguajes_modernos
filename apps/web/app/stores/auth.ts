@@ -17,7 +17,6 @@ export interface RegisterInput {
   zone: string
 }
 
-// Mensajes de Firebase Authentication en español
 function authMessage(error: unknown): string {
   const code = (error as { code?: string }).code ?? ''
   const messages: Record<string, string> = {
@@ -31,7 +30,6 @@ function authMessage(error: unknown): string {
   return messages[code] ?? (error as Error).message ?? 'No se pudo completar la operación.'
 }
 
-// Sesión del usuario: cuenta de Firebase + perfil con rol que guarda la API.
 export const useAuthStore = defineStore('auth', () => {
   const user = shallowRef<User | null>(null)
   const profile = ref<Profile | null>(null)
@@ -50,11 +48,10 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       profile.value = await useApi().request<Profile>('/me')
     } catch {
-      profile.value = null // la cuenta existe pero todavía no tiene perfil
+      profile.value = null 
     }
   }
 
-  // Se llama una vez en app.vue. Firebase avisa cuando cambia la sesión.
   function initialize() {
     if (started || !import.meta.client) return
     started = true
@@ -70,7 +67,6 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  // Espera a que Firebase diga si hay sesión (para las páginas que lo necesitan).
   async function whenReady() {
     if (ready.value) return
     await new Promise<void>((resolve) => {
@@ -131,7 +127,6 @@ export const useAuthStore = defineStore('auth', () => {
     await navigateTo('/')
   }
 
-  // A dónde mandar a cada rol después de entrar
   function homePath(): string {
     if (role.value === 'DONOR') return '/donor'
     if (role.value === 'ADMIN') return '/admin'
