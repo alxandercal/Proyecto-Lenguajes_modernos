@@ -1,7 +1,6 @@
 <template>
   <div class="space-y-5">
     <RoleNotice v-if="auth.ready && auth.role !== 'DONOR'" message="El panel es para cuentas de donador." />
-
     <template v-else>
       <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -40,7 +39,11 @@
         <table v-else class="table">
           <thead>
             <tr>
-              <th>Donación</th><th>Cantidad</th><th>Vence</th><th>Estado</th>
+              <th>Donación</th>
+              <th>Cantidad</th>
+              <th>Vence</th>
+              <th>Estado</th>
+              <th class="text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -54,6 +57,25 @@
               <td class="whitespace-nowrap">{{ formatQuantity(item.quantity, item.unit) }}</td>
               <td class="whitespace-nowrap text-sm">{{ formatDate(item.expiresAt) }}</td>
               <td><StatusBadge :status="item.status" /></td>
+              <td>
+                <div class="flex justify-end gap-1">
+                  <NuxtLink
+                    v-if="item.status === 'PUBLISHED'"
+                    :to="`/donations/new?edit=${item.id}`"
+                    class="btn btn-ghost btn-xs"
+                  >
+                    Editar
+                  </NuxtLink>
+                  <button
+                    v-if="item.status === 'PUBLISHED' || item.status === 'RESERVED'"
+                    class="btn btn-ghost btn-xs text-error"
+                    @click="cancel(item)"
+                  >
+                    Cancelar
+                  </button>
+                  <button v-if="canDelete(item)" class="btn btn-ghost btn-xs" @click="remove(item)">Borrar</button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -74,6 +96,9 @@ const error = ref('')
 
 const count = (status: DonationStatus) => donations.value.filter(item => item.status === status).length
 
+const canDelete = (item: Donation) =>
+  item.status === 'PUBLISHED' && !item.history.some(entry => entry.action === 'RESERVED')
+
 async function load() {
   if (auth.role !== 'DONOR') return
   loading.value = true
@@ -86,8 +111,29 @@ async function load() {
   }
 }
 
+async function cancel(item: Donation) {
+  if (!confirm(`¿Cancelar "${item.title}"? Si ya estaba reservada, se avisa al receptor.`)) return
+  try {
+    await request(`/donations/${item.id}`, { method: 'PATCH', body: { action: 'cancel' } })
+    await load()
+  } catch (e) {
+    error.value = (e as Error).message
+  }
+}
+
+async function remove(item: Donation) {
+  if (!confirm(`¿Borrar "${item.title}" para siempre?`)) return
+  try {
+    await request(`/donations/${item.id}`, { method: 'DELETE' })
+    await load()
+  } catch (e) {
+    error.value = (e as Error).message
+  }
+}
+
 onMounted(async () => {
   await auth.whenReady()
   await load()
 })
 </script>
+```[cite: 118, 119, 120]
