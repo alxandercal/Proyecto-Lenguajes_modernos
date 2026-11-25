@@ -14,12 +14,17 @@
           <NuxtLink to="/donations/new" class="btn btn-primary btn-sm">+ Publicar</NuxtLink>
         </template>
 
+        <NuxtLink v-if="auth.role === 'RECEIVER'" to="/reservations" class="btn btn-ghost btn-sm">
+          Mis reservas
+        </NuxtLink>
+
         <template v-if="auth.user">
           <span class="hidden px-2 text-xs opacity-70 md:inline">
             {{ auth.profile?.organizationName || auth.user.email }}
           </span>
           <button class="btn btn-outline btn-sm" @click="auth.logout()">Salir</button>
         </template>
+
         <template v-else-if="auth.ready">
           <NuxtLink to="/login" class="btn btn-ghost btn-sm">Ingresar</NuxtLink>
           <NuxtLink to="/register" class="btn btn-primary btn-sm">Crear cuenta</NuxtLink>
@@ -34,3 +39,4 @@ import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
 </script>
+```[cite: 120]
