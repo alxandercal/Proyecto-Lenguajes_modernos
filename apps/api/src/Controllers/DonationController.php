@@ -11,8 +11,7 @@ use ReFood\Domain\Priority;
 use ReFood\Http;
 use ReFood\Validator;
 
-// Donaciones: publicar, listar con filtros y prioridad, y ver el detalle.
-// En la R2 se agregan editar, cancelar y borrar.
+// CRUD de la entidad principal: donaciones.
 final class DonationController extends Controller
 {
     // GET /donations  (público) -> publicadas, con filtros y ordenadas por prioridad
@@ -107,6 +106,67 @@ final class DonationController extends Controller
         $zone = $from !== null && isset(Catalog::ZONES[$from]) ? $from : ($viewer['zone'] ?? null);
         $donation['priority'] = Priority::score($donation, $zone, $this->now);
         Http::json(['data' => $donation]);
+    }
+
+    // PATCH /donations/{id}  (DONOR dueño) -> editar, o cancelar con {"action":"cancel"}
+    public function update(string $id): never
+    {
+        $profile = Auth::role($this->token, 'DONOR');
+        $donation = $this->findDonation(Validator::documentId($id));
+        $this->assertOwner($donation, $profile);
+        $body = Http::body();
+
+        if (($body['action'] ?? null) === 'cancel') {
+            $this->cancel($donation, $profile, Validator::optionalText($body, 'note', 200));
+        }
+        if ($donation['status'] !== DonationStatus::PUBLISHED) {
+            throw new ApiException('Solo puedes editar donaciones publicadas.', 422);
+        }
+        $changes = $this->validated($body);
+        $changes['history'] = [...$donation['history'], $this->historyEntry('EDITED', $profile)];
+        $changes['updatedAt'] = $this->nowIso();
+        Http::json(['data' => $this->db->update('donations', $id, $changes, (string) $this->token)]);
+    }
+
+    // DELETE /donations/{id}  (DONOR dueño) -> solo si nunca tuvo reserva
+    public function delete(string $id): never
+    {
+        $profile = Auth::role($this->token, 'DONOR');
+        $donation = $this->findDonation(Validator::documentId($id));
+        $this->assertOwner($donation, $profile);
+        $wasReserved = in_array(
+            DonationStatus::RESERVED,
+            array_column($donation['history'], 'action'),
+            true
+        );
+        if ($donation['status'] !== DonationStatus::PUBLISHED || $wasReserved) {
+            throw new ApiException('Solo se borran donaciones que nunca se reservaron. Cancélala.', 422);
+        }
+        $this->db->delete('donations', $id, (string) $this->token);
+        Http::json(['data' => ['id' => $id, 'deleted' => true]]);
+    }
+
+    private function cancel(array $donation, array $profile, string $note): never
+    {
+        DonationStatus::assertCanMove($donation['status'], DonationStatus::CANCELLED, 'DONOR');
+        $id = $donation['id'];
+        $changes = [
+            'status' => DonationStatus::CANCELLED,
+            'history' => [...$donation['history'], $this->historyEntry(DonationStatus::CANCELLED, $profile, $note)],
+            'updatedAt' => $this->nowIso(),
+        ];
+        if ($donation['status'] === DonationStatus::RESERVED) {
+            // La reserva del receptor también se cancela, en el mismo commit.
+            $this->db->commit([
+                $this->db->updateWrite('donations', $id, $changes),
+                $this->db->updateWrite('reservations', $id, [
+                    'status' => 'CANCELLED',
+                    'updatedAt' => $this->nowIso(),
+                ]),
+            ], (string) $this->token);
+            Http::json(['data' => $this->findDonation($id)]);
+        }
+        Http::json(['data' => $this->db->update('donations', $id, $changes, (string) $this->token)]);
     }
 
     // Campos que el donador captura, validados. Se usan al crear y al editar.

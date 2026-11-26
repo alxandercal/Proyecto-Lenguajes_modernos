@@ -5,6 +5,7 @@ namespace ReFood;
 
 use ReFood\Controllers\DonationController;
 use ReFood\Controllers\ProfileController;
+use ReFood\Controllers\ReservationController;
 use ReFood\Domain\Catalog;
 
 // Enrutador: decide qué controlador atiende cada ruta y convierte los errores en JSON.
@@ -18,6 +19,11 @@ final class Application
         ['POST', 'donations', DonationController::class, 'create'],
         ['GET', 'donor/donations', DonationController::class, 'mine'],
         ['GET', 'donations/{id}', DonationController::class, 'show'],
+        ['PATCH', 'donations/{id}', DonationController::class, 'update'],
+        ['DELETE', 'donations/{id}', DonationController::class, 'delete'],
+        ['POST', 'reservations', ReservationController::class, 'create'],
+        ['GET', 'reservations/mine', ReservationController::class, 'mine'],
+        ['DELETE', 'reservations/{id}', ReservationController::class, 'release'],
     ];
 
     public static function handle(): void
@@ -32,7 +38,7 @@ final class Application
             $route = trim(substr($path, strlen('api/v1')), '/');
 
             if ($method === 'GET' && $route === 'health') {
-                Http::json(['ok' => true, 'service' => 'refood-api', 'version' => 'R1']);
+                Http::json(['ok' => true, 'service' => 'refood-api', 'version' => 'R2']);
             }
             if ($method === 'GET' && $route === 'catalog') {
                 Http::json(['data' => Catalog::toArray()]);
