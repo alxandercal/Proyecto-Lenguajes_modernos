@@ -5,7 +5,7 @@ Plataforma web para que la comida que restaurantes, cafeterías y comercios no v
 | | |
 | --- | --- |
 | Frontend publicado | https://PENDIENTE.netlify.app |
-| API publicada | https://PENDIENTE.onrender.com/api/v1/health |
+| API publicada | https://refood-connect-api.onrender.com/api/v1/health |
 | Repositorio | https://github.com/alxandercal/Proyecto-Lenguajes_modernos |
 
 ## Problema
