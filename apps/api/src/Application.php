@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace ReFood;
 
 use ReFood\Controllers\DonationController;
+use ReFood\Controllers\MetricsController;
+use ReFood\Controllers\PickupController;
 use ReFood\Controllers\ProfileController;
 use ReFood\Controllers\ReservationController;
 use ReFood\Domain\Catalog;
@@ -24,6 +26,10 @@ final class Application
         ['POST', 'reservations', ReservationController::class, 'create'],
         ['GET', 'reservations/mine', ReservationController::class, 'mine'],
         ['DELETE', 'reservations/{id}', ReservationController::class, 'release'],
+        ['POST', 'pickups', PickupController::class, 'create'],
+        ['GET', 'pickups/{id}', PickupController::class, 'show'],
+        ['GET', 'metrics/mine', MetricsController::class, 'mine'],
+        ['GET', 'metrics', MetricsController::class, 'global'],
     ];
 
     public static function handle(): void
@@ -38,7 +44,7 @@ final class Application
             $route = trim(substr($path, strlen('api/v1')), '/');
 
             if ($method === 'GET' && $route === 'health') {
-                Http::json(['ok' => true, 'service' => 'refood-api', 'version' => 'R2']);
+                Http::json(['ok' => true, 'service' => 'refood-api', 'version' => 'R3']);
             }
             if ($method === 'GET' && $route === 'catalog') {
                 Http::json(['data' => Catalog::toArray()]);
